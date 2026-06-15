@@ -15,7 +15,6 @@ const els = {
   audioEl: document.getElementById('audio-el'),
   stageInfo: document.getElementById('stage-info'),
   nowTitle: document.getElementById('now-title'),
-  playModePill: document.getElementById('play-mode-pill'),
   disc: document.querySelector('#audio-stage .disc'),
   waveform: document.querySelector('#audio-stage .waveform'),
 
@@ -196,29 +195,24 @@ function renderTrackList() {
         <div class="name">${escapeHtml(track.title.trim())}</div>
         <div class="sub">${subText}</div>
       </div>
-      <button class="offline-btn ${isSaved && track.id === currentTrackId ? 'active' : ''}" data-id="${track.id}" ${isSaved ? '' : 'disabled'} title="オフラインで再生">
-        ⏵
-      </button>
-      <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${track.id}" ${hasAudio ? '' : 'disabled'} title="音声を保存">
-        ${isSaved ? '✓' : '⬇'}
+      <button class="action-btn ${isSaved ? 'saved' : ''}" data-id="${track.id}" ${hasAudio ? '' : 'disabled'} title="${isSaved ? 'オフラインで再生' : '音声を保存'}">
+        ${isSaved ? '⏵' : '⬇'}
       </button>
     `;
 
     row.addEventListener('click', (e) => {
-      if (e.target.closest('.save-btn') || e.target.closest('.offline-btn')) return;
+      if (e.target.closest('.action-btn')) return;
       playTrack(track.id);
     });
 
-    const offlineBtn = row.querySelector('.offline-btn');
-    offlineBtn.addEventListener('click', (e) => {
+    const actionBtn = row.querySelector('.action-btn');
+    actionBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      playTrackOffline(track.id);
-    });
-
-    const saveBtn = row.querySelector('.save-btn');
-    saveBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleSave(track.id);
+      if (isSaved) {
+        playTrackOffline(track.id);
+      } else {
+        saveTrack(track.id);
+      }
     });
 
     els.trackList.appendChild(row);
@@ -254,8 +248,6 @@ async function playTrack(trackId) {
   if (navigator.onLine && track.video) {
     els.videoFrame.src = `https://drive.google.com/file/d/${track.video.id}/preview`;
     els.videoFrame.classList.add('show');
-    els.playModePill.textContent = '映像再生中（オンライン）';
-    els.playModePill.classList.add('on');
     if ('mediaSession' in navigator) {
       navigator.mediaSession.playbackState = 'none';
       navigator.mediaSession.metadata = null;
@@ -267,23 +259,20 @@ async function playTrack(trackId) {
 
   if (saved) {
     const url = URL.createObjectURL(saved.blob);
-    setupAudioPlayer(url, '保存した音声を再生中', track.title.trim());
+    setupAudioPlayer(url, track.title.trim());
     return;
   }
 
   if (navigator.onLine && track.audio) {
     els.audioStage.classList.add('show');
     els.audioStageTitle.textContent = '読み込み中…';
-    els.playModePill.textContent = '読み込み中…';
-    els.playModePill.classList.remove('on');
     try {
       const res = await fetch(`${GAS_URL}?action=stream&id=${track.audio.id}`);
       const data = await res.json();
       const blob = base64ToBlob(data.base64, data.mime);
       const url = URL.createObjectURL(blob);
-      setupAudioPlayer(url, '音声を再生中（オンライン）', track.title.trim());
+      setupAudioPlayer(url, track.title.trim());
     } catch (err) {
-      els.playModePill.textContent = '音声の取得に失敗しました';
       els.audioStageTitle.textContent = '取得に失敗しました';
     }
     return;
@@ -292,8 +281,6 @@ async function playTrack(trackId) {
   // オフラインかつ未保存
   els.audioStage.classList.add('show');
   els.audioStageTitle.textContent = `${track.title.trim()}\n（未保存のためオフラインで再生できません）`;
-  els.playModePill.textContent = 'オフライン・未保存';
-  els.playModePill.classList.remove('on');
 }
 
 // 「オフラインで再生」ボタン用：オンライン中でも常に保存済み音声を再生する
@@ -318,18 +305,15 @@ async function playTrackOffline(trackId) {
   els.nowTitle.textContent = track.title.trim();
 
   const url = URL.createObjectURL(saved.blob);
-  setupAudioPlayer(url, '保存した音声を再生中（オフライン再生）', track.title.trim());
+  setupAudioPlayer(url, track.title.trim());
 }
 
-function setupAudioPlayer(url, label, title) {
+function setupAudioPlayer(url, title) {
   els.audioStage.classList.add('show');
   els.audioStageTitle.textContent = title;
 
   els.audioEl.src = url;
   els.audioEl.play().catch(() => {});
-
-  els.playModePill.textContent = label;
-  els.playModePill.classList.add('on');
 
   els.disc.classList.add('spin');
   els.waveform.classList.remove('paused');
@@ -414,26 +398,18 @@ function base64ToBlob(base64, mime) {
 }
 
 // ============================================================
-// 保存 / 削除
+// 保存
 // ============================================================
-async function toggleSave(trackId) {
+async function saveTrack(trackId) {
   const track = tracks.find((t) => t.id === trackId);
   if (!track || !track.audio) return;
-
-  if (savedIds.has(trackId)) {
-    await dbDelete(trackId);
-    savedIds.delete(trackId);
-    renderTrackList();
-    await updateStorageInfo();
-    return;
-  }
 
   if (!navigator.onLine) {
     alert('保存にはオンライン環境が必要です');
     return;
   }
 
-  const btn = els.trackList.querySelector(`.save-btn[data-id="${trackId}"]`);
+  const btn = els.trackList.querySelector(`.action-btn[data-id="${trackId}"]`);
   if (btn) {
     btn.textContent = '…';
     btn.disabled = true;
