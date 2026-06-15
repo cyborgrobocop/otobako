@@ -201,21 +201,6 @@
     text-overflow: ellipsis;
   }
 
-  .pill{
-    font-size: 0.7rem;
-    padding: 3px 9px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    color: var(--text-dim);
-    background: rgba(0,0,0,0.3);
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-  .pill.on{
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
   audio#audio-el{ display: none; }
 
   /* オフラインバナー */
@@ -323,7 +308,7 @@
     margin-top: 2px;
   }
 
-  .save-btn{
+  .action-btn{
     flex-shrink: 0;
     width: 34px;
     height: 34px;
@@ -336,33 +321,14 @@
     align-items: center;
     justify-content: center;
   }
-  .save-btn.saved{
-    border-color: var(--ok);
-    color: var(--ok);
-  }
-  .save-btn:active{ transform: scale(0.92); }
-
-  .offline-btn{
-    flex-shrink: 0;
-    width: 34px;
-    height: 34px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--text-dim);
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .offline-btn:disabled{
+  .action-btn:disabled{
     opacity: 0.3;
   }
-  .offline-btn:not(:disabled):active{ transform: scale(0.92); }
-  .offline-btn.active{
+  .action-btn.saved{
     border-color: var(--accent);
     color: var(--accent);
   }
+  .action-btn:not(:disabled):active{ transform: scale(0.92); }
 
   /* ===== フッター（保存容量） ===== */
   #list-footer{
@@ -414,7 +380,6 @@
 
     <div id="stage-info">
       <span class="now-title" id="now-title"></span>
-      <span class="pill" id="play-mode-pill"></span>
     </div>
   </div>
 
