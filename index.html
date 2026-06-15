@@ -93,16 +93,57 @@
     opacity: 0.7;
   }
 
-  /* 動画iframe */
-  #video-frame{
+  /* 動画プレイヤー */
+  #video-wrap{
     position: absolute;
     inset: 0;
+    display: none;
+    background: #000;
+  }
+  #video-wrap.show{ display: block; }
+
+  #video-el{
     width: 100%;
     height: 100%;
-    border: 0;
-    display: none;
+    object-fit: contain;
+    display: block;
+    background: #000;
   }
-  #video-frame.show{ display: block; }
+
+  #video-overlay{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .video-ctrl-btn{
+    border: 1px solid var(--line);
+    background: rgba(0,0,0,0.45);
+    color: var(--text);
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #video-play-btn{
+    width: 64px;
+    height: 64px;
+    font-size: 1.6rem;
+  }
+  #video-play-btn:active{ transform: scale(0.95); }
+
+  #video-fullscreen-btn.corner{
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+  #video-fullscreen-btn:active{ transform: scale(0.92); }
 
   /* 音声のみ表示（ジャケット風 + 波形） */
   #audio-stage{
@@ -365,7 +406,13 @@
       <div class="tagline">映像はオンラインで。音だけを、持ち歩く。</div>
     </div>
 
-    <iframe id="video-frame" allow="autoplay"></iframe>
+    <div id="video-wrap">
+      <video id="video-el" playsinline></video>
+      <div id="video-overlay">
+        <button id="video-play-btn" class="video-ctrl-btn" title="再生 / 一時停止">▶</button>
+        <button id="video-fullscreen-btn" class="video-ctrl-btn corner" title="全画面">⤢</button>
+      </div>
+    </div>
 
     <div id="audio-stage">
       <div class="disc"><div class="disc-core"></div></div>
