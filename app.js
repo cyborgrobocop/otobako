@@ -1,7 +1,7 @@
 // ============================================================
 // 設定：GASの /exec URL をここに設定してください
 // ============================================================
-const GAS_URL = 'ここに GAS の /exec URL を入れる';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyBVswH3dx-jGkbEX-17JXNCjSLdae9sUvvjeG_m0CbSWbNCxkjGZuTC_VCyf8GBoD2RQ/exec';
 
 // ============================================================
 // 要素参照
