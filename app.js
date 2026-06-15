@@ -9,10 +9,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbyBVswH3dx-jGkbEX-17JXN
 const els = {
   statusBanner: document.getElementById('status-banner'),
   stageBrand: document.getElementById('stage-brand'),
-  videoWrap: document.getElementById('video-wrap'),
-  videoEl: document.getElementById('video-el'),
-  videoPlayBtn: document.getElementById('video-play-btn'),
-  videoFullscreenBtn: document.getElementById('video-fullscreen-btn'),
+  videoFrame: document.getElementById('video-frame'),
   audioStage: document.getElementById('audio-stage'),
   audioStageTitle: document.getElementById('audio-stage-title'),
   audioEl: document.getElementById('audio-el'),
@@ -242,10 +239,8 @@ async function playTrack(trackId) {
   renderTrackList();
 
   els.stageBrand.classList.add('hidden');
-  els.videoWrap.classList.remove('show');
-  els.videoEl.pause();
-  els.videoEl.removeAttribute('src');
-  els.videoEl.load();
+  els.videoFrame.classList.remove('show');
+  els.videoFrame.src = '';
   els.audioStage.classList.remove('show');
   els.disc.classList.remove('spin');
   els.audioEl.pause();
@@ -254,11 +249,12 @@ async function playTrack(trackId) {
   els.nowTitle.textContent = track.title.trim();
 
   if (navigator.onLine && track.video) {
+    els.videoFrame.src = `https://drive.google.com/file/d/${track.video.id}/preview`;
+    els.videoFrame.classList.add('show');
     if ('mediaSession' in navigator) {
       navigator.mediaSession.playbackState = 'none';
       navigator.mediaSession.metadata = null;
     }
-    setupVideoPlayer(track.video.id);
     return;
   }
 
@@ -302,10 +298,8 @@ async function playTrackOffline(trackId) {
   renderTrackList();
 
   els.stageBrand.classList.add('hidden');
-  els.videoWrap.classList.remove('show');
-  els.videoEl.pause();
-  els.videoEl.removeAttribute('src');
-  els.videoEl.load();
+  els.videoFrame.classList.remove('show');
+  els.videoFrame.src = '';
   els.audioStage.classList.remove('show');
   els.disc.classList.remove('spin');
   els.audioEl.pause();
@@ -316,46 +310,6 @@ async function playTrackOffline(trackId) {
   const url = URL.createObjectURL(saved.blob);
   setupAudioPlayer(url, track.title.trim());
 }
-
-// ============================================================
-// 動画プレイヤー（再生/一時停止・全画面のみのシンプルUI）
-// ============================================================
-function setupVideoPlayer(fileId) {
-  els.videoWrap.classList.add('show');
-  // Driveの直接ダウンロードリンクをそのまま<video>のsrcに使う
-  // （ファイルが「リンクを知っている全員」に共有されている必要がある）
-  els.videoEl.src = `https://drive.google.com/uc?export=view&id=${fileId}`;
-  els.videoEl.play().catch(() => {
-    // 自動再生がブロックされた場合は一時停止状態で表示
-    updateVideoPlayIcon();
-  });
-}
-
-function toggleVideoPlay() {
-  if (els.videoEl.paused) {
-    els.videoEl.play().catch(() => {});
-  } else {
-    els.videoEl.pause();
-  }
-}
-
-function updateVideoPlayIcon() {
-  els.videoPlayBtn.textContent = els.videoEl.paused ? '▶' : '⏸';
-}
-
-els.videoPlayBtn.addEventListener('click', toggleVideoPlay);
-els.videoEl.addEventListener('play', updateVideoPlayIcon);
-els.videoEl.addEventListener('pause', updateVideoPlayIcon);
-els.videoEl.addEventListener('click', toggleVideoPlay);
-
-els.videoFullscreenBtn.addEventListener('click', () => {
-  if (els.videoEl.requestFullscreen) {
-    els.videoEl.requestFullscreen();
-  } else if (els.videoEl.webkitEnterFullscreen) {
-    // iOS Safari
-    els.videoEl.webkitEnterFullscreen();
-  }
-});
 
 function setupAudioPlayer(url, title) {
   els.audioStage.classList.add('show');
