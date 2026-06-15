@@ -20,6 +20,9 @@ const els = {
   nowTitle: document.getElementById('now-title'),
   disc: document.querySelector('#audio-stage .disc'),
   waveform: document.querySelector('#audio-stage .waveform'),
+  seekBar: document.getElementById('seek-bar'),
+  seekCurrent: document.getElementById('seek-current'),
+  seekDuration: document.getElementById('seek-duration'),
 
   trackCount: document.getElementById('track-count'),
   loadingState: document.getElementById('loading-state'),
@@ -321,7 +324,7 @@ function setupVideoPlayer(fileId) {
   els.videoWrap.classList.add('show');
   // Driveの直接ダウンロードリンクをそのまま<video>のsrcに使う
   // （ファイルが「リンクを知っている全員」に共有されている必要がある）
-  els.videoEl.src = `https://drive.google.com/uc?export=download&id=${fileId}`;
+  els.videoEl.src = `https://drive.google.com/uc?export=view&id=${fileId}`;
   els.videoEl.play().catch(() => {
     // 自動再生がブロックされた場合は一時停止状態で表示
     updateVideoPlayIcon();
@@ -378,7 +381,40 @@ function setupAudioPlayer(url, title) {
     playAdjacentSavedTrack(1);
   };
 
+  // シークバー: 再生位置に合わせて更新
+  els.audioEl.onloadedmetadata = () => {
+    els.seekBar.max = els.audioEl.duration || 0;
+    els.seekDuration.textContent = formatTime(els.audioEl.duration);
+  };
+  els.audioEl.ontimeupdate = () => {
+    if (!isSeeking) {
+      els.seekBar.value = els.audioEl.currentTime;
+    }
+    els.seekCurrent.textContent = formatTime(els.audioEl.currentTime);
+  };
+  els.seekBar.value = 0;
+  els.seekCurrent.textContent = '0:00';
+  els.seekDuration.textContent = '0:00';
+
   updateMediaSession(title);
+}
+
+// シークバー操作
+let isSeeking = false;
+els.seekBar.addEventListener('input', () => {
+  isSeeking = true;
+  els.seekCurrent.textContent = formatTime(parseFloat(els.seekBar.value));
+});
+els.seekBar.addEventListener('change', () => {
+  els.audioEl.currentTime = parseFloat(els.seekBar.value);
+  isSeeking = false;
+});
+
+function formatTime(seconds) {
+  if (!isFinite(seconds) || seconds < 0) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 // ============================================================
