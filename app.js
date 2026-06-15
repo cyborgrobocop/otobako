@@ -247,6 +247,10 @@ async function playTrack(trackId) {
     els.videoFrame.classList.add('show');
     els.playModePill.textContent = '映像再生中（オンライン）';
     els.playModePill.classList.add('on');
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.metadata = null;
+    }
     return;
   }
 
@@ -304,6 +308,66 @@ function setupAudioPlayer(url, label, title) {
     els.disc.classList.add('spin');
     els.waveform.classList.remove('paused');
   };
+
+  // 再生終了時、保存済みの次の曲へ自動で進む
+  els.audioEl.onended = () => {
+    playAdjacentSavedTrack(1);
+  };
+
+  updateMediaSession(title);
+}
+
+// ============================================================
+// バックグラウンド再生対応（Media Session API）
+// 画面ロック・通知欄から再生中の曲を表示・操作できるようにする
+// ============================================================
+function updateMediaSession(title) {
+  if (!('mediaSession' in navigator)) return;
+
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: title,
+    artist: 'Otobako',
+    album: '保存済みの音声',
+    artwork: [
+      { src: './icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: './icon-512.png', sizes: '512x512', type: 'image/png' },
+    ]
+  });
+
+  navigator.mediaSession.setActionHandler('play', () => {
+    els.audioEl.play().catch(() => {});
+  });
+  navigator.mediaSession.setActionHandler('pause', () => {
+    els.audioEl.pause();
+  });
+  navigator.mediaSession.setActionHandler('previoustrack', () => {
+    playAdjacentSavedTrack(-1);
+  });
+  navigator.mediaSession.setActionHandler('nexttrack', () => {
+    playAdjacentSavedTrack(1);
+  });
+  navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+    els.audioEl.currentTime = Math.max(0, els.audioEl.currentTime - (details.seekOffset || 10));
+  });
+  navigator.mediaSession.setActionHandler('seekforward', (details) => {
+    els.audioEl.currentTime = Math.min(els.audioEl.duration || Infinity, els.audioEl.currentTime + (details.seekOffset || 10));
+  });
+}
+
+// 保存済みの曲の中で、現在再生中の曲の前後にある曲を再生する
+function playAdjacentSavedTrack(direction) {
+  const savedTracks = tracks.filter((t) => savedIds.has(t.id));
+  if (savedTracks.length === 0) return;
+
+  const currentIndex = savedTracks.findIndex((t) => t.id === currentTrackId);
+  let nextIndex;
+  if (currentIndex === -1) {
+    nextIndex = 0;
+  } else {
+    nextIndex = (currentIndex + direction + savedTracks.length) % savedTracks.length;
+  }
+
+  playTrack(savedTracks[nextIndex].id);
 }
 
 function base64ToBlob(base64, mime) {
