@@ -196,14 +196,23 @@ function renderTrackList() {
         <div class="name">${escapeHtml(track.title.trim())}</div>
         <div class="sub">${subText}</div>
       </div>
+      <button class="offline-btn ${isSaved && track.id === currentTrackId ? 'active' : ''}" data-id="${track.id}" ${isSaved ? '' : 'disabled'} title="オフラインで再生">
+        ⏵
+      </button>
       <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${track.id}" ${hasAudio ? '' : 'disabled'} title="音声を保存">
         ${isSaved ? '✓' : '⬇'}
       </button>
     `;
 
     row.addEventListener('click', (e) => {
-      if (e.target.closest('.save-btn')) return;
+      if (e.target.closest('.save-btn') || e.target.closest('.offline-btn')) return;
       playTrack(track.id);
+    });
+
+    const offlineBtn = row.querySelector('.offline-btn');
+    offlineBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playTrackOffline(track.id);
     });
 
     const saveBtn = row.querySelector('.save-btn');
@@ -285,6 +294,31 @@ async function playTrack(trackId) {
   els.audioStageTitle.textContent = `${track.title.trim()}\n（未保存のためオフラインで再生できません）`;
   els.playModePill.textContent = 'オフライン・未保存';
   els.playModePill.classList.remove('on');
+}
+
+// 「オフラインで再生」ボタン用：オンライン中でも常に保存済み音声を再生する
+async function playTrackOffline(trackId) {
+  const track = tracks.find((t) => t.id === trackId);
+  if (!track) return;
+
+  const saved = await dbGet(trackId);
+  if (!saved) return;
+
+  currentTrackId = trackId;
+  renderTrackList();
+
+  els.stageBrand.classList.add('hidden');
+  els.videoFrame.classList.remove('show');
+  els.videoFrame.src = '';
+  els.audioStage.classList.remove('show');
+  els.disc.classList.remove('spin');
+  els.audioEl.pause();
+  els.audioEl.src = '';
+  els.stageInfo.classList.add('show');
+  els.nowTitle.textContent = track.title.trim();
+
+  const url = URL.createObjectURL(saved.blob);
+  setupAudioPlayer(url, '保存した音声を再生中（オフライン再生）', track.title.trim());
 }
 
 function setupAudioPlayer(url, label, title) {
