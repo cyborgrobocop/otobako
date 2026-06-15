@@ -342,6 +342,28 @@
   }
   .save-btn:active{ transform: scale(0.92); }
 
+  .offline-btn{
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .offline-btn:disabled{
+    opacity: 0.3;
+  }
+  .offline-btn:not(:disabled):active{ transform: scale(0.92); }
+  .offline-btn.active{
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
   /* ===== フッター（保存容量） ===== */
   #list-footer{
     flex-shrink: 0;
@@ -388,7 +410,7 @@
       <div class="stage-title" id="audio-stage-title"></div>
     </div>
 
-    <audio id="audio-el" controls></audio>
+    <audio id="audio-el"></audio>
 
     <div id="stage-info">
       <span class="now-title" id="now-title"></span>
