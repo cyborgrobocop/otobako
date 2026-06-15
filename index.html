@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#13151A">
+<title>Otobako - 持ち歩く音の箱</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+  :root{
+    --bg: #13151A;
+    --panel: #1B1E26;
+    --panel-raised: #232733;
+    --text: #F2EDE4;
+    --text-dim: #9AA0AC;
+    --accent: #D9A24B;
+    --accent-soft: rgba(217, 162, 75, 0.16);
+    --line: #2C313D;
+    --ok: #5A6B5D;
+    --radius: 14px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* ===== ヘッダー ===== */
+  header{
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+
+  header .brand{
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  header .brand h1{
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  header .brand .mark{
+    font-size: 1.1rem;
+    color: var(--accent);
+  }
+
+  header p.tagline{
+    margin: 6px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+  }
+
+  #status-banner{
+    margin-top: 10px;
+    font-size: 0.78rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--panel-raised);
+    color: var(--text-dim);
+    display: none;
+  }
+  #status-banner.show{ display: inline-block; }
+  #status-banner.offline{ color: var(--accent); background: var(--accent-soft); }
+
+  /* ===== メインレイアウト ===== */
+  main{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* --- 再生エリア --- */
+  #player-area{
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+
+  #now-playing-title{
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+  }
+
+  #now-playing-name{
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0 0 14px;
+    min-height: 1.4em;
+    color: var(--text);
+  }
+
+  .media-frame{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+
+  .media-frame iframe{
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .media-frame.audio-only{
+    aspect-ratio: auto;
+    height: 96px;
+    background: linear-gradient(135deg, var(--panel-raised), var(--panel));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 波形風アニメーション（シグネチャ要素） */
+  .waveform{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 40px;
+  }
+  .waveform .bar{
+    width: 4px;
+    border-radius: 2px;
+    background: var(--accent);
+    opacity: 0.85;
+    animation: wave 1.1s ease-in-out infinite;
+  }
+  .waveform .bar:nth-child(1){ height: 14px; animation-delay: -1.1s; }
+  .waveform .bar:nth-child(2){ height: 28px; animation-delay: -0.9s; }
+  .waveform .bar:nth-child(3){ height: 38px; animation-delay: -0.7s; }
+  .waveform .bar:nth-child(4){ height: 22px; animation-delay: -0.5s; }
+  .waveform .bar:nth-child(5){ height: 32px; animation-delay: -0.3s; }
+  .waveform .bar:nth-child(6){ height: 18px; animation-delay: -0.1s; }
+  .waveform .bar:nth-child(7){ height: 26px; animation-delay: -0.2s; }
+
+  .waveform.paused .bar{ animation-play-state: paused; opacity: 0.35; }
+
+  @keyframes wave{
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
+  audio#audio-el{
+    width: 100%;
+    display: block;
+  }
+  audio#audio-el.hidden{ display: none; }
+
+  #player-controls{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .pill{
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+  }
+  .pill.on{
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  /* ===== プレイリスト ===== */
+  #playlist-section{
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 20px 24px;
+  }
+
+  #playlist-section h2{
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 16px 0 10px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    padding: 6px 0;
+  }
+
+  .track-card{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius);
+    background: var(--panel);
+    margin-bottom: 8px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .track-card:active{ background: var(--panel-raised); }
+  .track-card.playing{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .track-card .play-icon{
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: var(--panel-raised);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+  .track-card.playing .play-icon{
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .track-card .meta{
+    flex: 1;
+    min-width: 0;
+  }
+  .track-card .meta .name{
+    font-size: 0.94rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .track-card .meta .sub{
+    font-size: 0.74rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .badge{
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+  }
+  .badge.saved{
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+
+  .save-btn{
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .save-btn.saved{
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+  .save-btn:active{ transform: scale(0.94); }
+
+  #empty-state, #loading-state, #error-state{
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    padding: 40px 20px;
+    line-height: 1.7;
+  }
+  #error-state{ display: none; color: var(--accent); }
+
+  /* ===== フッター（保存容量） ===== */
+  footer{
+    flex-shrink: 0;
+    border-top: 1px solid var(--line);
+    padding: 10px 20px;
+    font-size: 0.74rem;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer button{
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.74rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="mark">●</span>
+    <h1>OTOBAKO</h1>
+  </div>
+  <p class="tagline">映像はオンラインで。音だけを、持ち歩く。</p>
+  <div id="status-banner"></div>
+</header>
+
+<main>
+  <section id="player-area">
+    <p id="now-playing-title">NOW PLAYING</p>
+    <p id="now-playing-name">曲を選んでください</p>
+
+    <div class="media-frame" id="media-frame">
+      <!-- iframe（動画）または波形（音声のみ）がここに入る -->
+    </div>
+
+    <audio id="audio-el" class="hidden" controls></audio>
+
+    <div id="player-controls"></div>
+  </section>
+
+  <section id="playlist-section">
+    <h2>プレイリスト</h2>
+    <div id="loading-state">読み込み中…</div>
+    <div id="error-state"></div>
+    <div id="empty-state" style="display:none;">
+      まだ曲が登録されていません。<br>
+      Google Driveの videos / music フォルダに<br>
+      同名のmp4・mp3を入れてください。
+    </div>
+    <div id="track-list"></div>
+  </section>
+</main>
+
+<footer>
+  <span id="storage-info">保存容量: 取得中…</span>
+  <button id="clear-btn">保存をすべて削除</button>
+</footer>
+
+<script src="./app.js"></script>
+</body>
+</html>
