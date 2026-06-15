@@ -1,5 +1,5 @@
 // ============================================================
-// 設定：GASの /exec URL をここに設定してください
+// 設定：GASの /exec URL
 // ============================================================
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyBVswH3dx-jGkbEX-17JXNCjSLdae9sUvvjeG_m0CbSWbNCxkjGZuTC_VCyf8GBoD2RQ/exec';
 
@@ -8,10 +8,18 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbyBVswH3dx-jGkbEX-17JXN
 // ============================================================
 const els = {
   statusBanner: document.getElementById('status-banner'),
-  nowPlayingName: document.getElementById('now-playing-name'),
-  mediaFrame: document.getElementById('media-frame'),
+  stageBrand: document.getElementById('stage-brand'),
+  videoFrame: document.getElementById('video-frame'),
+  audioStage: document.getElementById('audio-stage'),
+  audioStageTitle: document.getElementById('audio-stage-title'),
   audioEl: document.getElementById('audio-el'),
-  playerControls: document.getElementById('player-controls'),
+  stageInfo: document.getElementById('stage-info'),
+  nowTitle: document.getElementById('now-title'),
+  playModePill: document.getElementById('play-mode-pill'),
+  disc: document.querySelector('#audio-stage .disc'),
+  waveform: document.querySelector('#audio-stage .waveform'),
+
+  trackCount: document.getElementById('track-count'),
   loadingState: document.getElementById('loading-state'),
   errorState: document.getElementById('error-state'),
   emptyState: document.getElementById('empty-state'),
@@ -22,7 +30,7 @@ const els = {
 
 let tracks = [];
 let currentTrackId = null;
-let savedIds = new Set(); // IndexedDBに保存済みのトラックID
+let savedIds = new Set();
 
 // ============================================================
 // IndexedDB ヘルパー
@@ -106,11 +114,11 @@ async function dbClearAll() {
 // ============================================================
 function updateStatusBanner() {
   if (navigator.onLine) {
-    els.statusBanner.classList.remove('show', 'offline');
+    els.statusBanner.classList.remove('show');
     els.statusBanner.textContent = '';
   } else {
     els.statusBanner.textContent = 'オフライン: 保存済みの音声のみ再生できます';
-    els.statusBanner.classList.add('show', 'offline');
+    els.statusBanner.classList.add('show');
   }
 }
 window.addEventListener('online', updateStatusBanner);
@@ -130,15 +138,12 @@ async function loadPlaylist() {
       if (!res.ok) throw new Error('一覧の取得に失敗しました');
       const data = await res.json();
       tracks = data.tracks || [];
-      // 取得できた一覧はオフライン時のためにローカルへ保持
       localStorage.setItem('otobako_playlist_cache', JSON.stringify(tracks));
     } else {
-      // オフライン時はキャッシュした一覧を使う
       const cached = localStorage.getItem('otobako_playlist_cache');
       tracks = cached ? JSON.parse(cached) : [];
     }
   } catch (err) {
-    // 通信失敗時もキャッシュがあれば使う
     const cached = localStorage.getItem('otobako_playlist_cache');
     if (cached) {
       tracks = JSON.parse(cached);
@@ -153,6 +158,8 @@ async function loadPlaylist() {
   savedIds = new Set(await dbGetAllIds());
 
   els.loadingState.style.display = 'none';
+  els.trackCount.textContent = tracks.length > 0 ? `${tracks.length}曲` : '';
+
   if (tracks.length === 0) {
     els.emptyState.style.display = 'block';
     return;
@@ -165,43 +172,47 @@ async function loadPlaylist() {
 // 一覧描画
 // ============================================================
 function renderTrackList() {
-  els.trackList.innerHTML = '';
-  tracks.forEach((track) => {
-    const card = document.createElement('div');
-    card.className = 'track-card';
-    card.dataset.id = track.id;
-    if (track.id === currentTrackId) card.classList.add('playing');
+  // 既存の行だけ削除（loading/error/emptyのstate要素は残す）
+  els.trackList.querySelectorAll('.track-row').forEach((el) => el.remove());
+
+  tracks.forEach((track, i) => {
+    const row = document.createElement('div');
+    row.className = 'track-row';
+    row.dataset.id = track.id;
+    if (track.id === currentTrackId) row.classList.add('playing');
 
     const isSaved = savedIds.has(track.id);
     const hasAudio = !!track.audio;
     const hasVideo = !!track.video;
 
-    card.innerHTML = `
-      <div class="play-icon">${track.id === currentTrackId ? '♪' : '▶'}</div>
+    let subText = '';
+    if (hasVideo && hasAudio) subText = isSaved ? '映像・音声（保存済み）' : '映像・音声';
+    else if (hasVideo) subText = '映像のみ';
+    else if (hasAudio) subText = isSaved ? '音声のみ（保存済み）' : '音声のみ';
+
+    row.innerHTML = `
+      <div class="idx">${i + 1}</div>
       <div class="meta">
-        <div class="name">${escapeHtml(track.title)}</div>
-        <div class="sub">
-          ${hasVideo ? '<span class="badge">映像あり</span>' : '<span class="badge">映像なし</span>'}
-          ${hasAudio ? (isSaved ? '<span class="badge saved">保存済み</span>' : '<span class="badge">音声あり</span>') : '<span class="badge">音声なし</span>'}
-        </div>
+        <div class="name">${escapeHtml(track.title.trim())}</div>
+        <div class="sub">${subText}</div>
       </div>
       <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${track.id}" ${hasAudio ? '' : 'disabled'} title="音声を保存">
         ${isSaved ? '✓' : '⬇'}
       </button>
     `;
 
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.save-btn')) return; // 保存ボタンは別処理
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.save-btn')) return;
       playTrack(track.id);
     });
 
-    const saveBtn = card.querySelector('.save-btn');
+    const saveBtn = row.querySelector('.save-btn');
     saveBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleSave(track.id);
     });
 
-    els.trackList.appendChild(card);
+    els.trackList.appendChild(row);
   });
 }
 
@@ -219,76 +230,80 @@ async function playTrack(trackId) {
   if (!track) return;
 
   currentTrackId = trackId;
-  els.nowPlayingName.textContent = track.title;
   renderTrackList();
 
-  // 既存の再生を止める
+  els.stageBrand.classList.add('hidden');
+  els.videoFrame.classList.remove('show');
+  els.videoFrame.src = '';
+  els.audioStage.classList.remove('show');
+  els.disc.classList.remove('spin');
   els.audioEl.pause();
   els.audioEl.src = '';
-  els.audioEl.classList.add('hidden');
-  els.mediaFrame.innerHTML = '';
-  els.mediaFrame.classList.remove('audio-only');
-  els.playerControls.innerHTML = '';
+  els.stageInfo.classList.add('show');
+  els.nowTitle.textContent = track.title.trim();
 
   if (navigator.onLine && track.video) {
-    // ---- オンライン: 動画をDrive iframeで埋め込み ----
-    const iframe = document.createElement('iframe');
-    iframe.src = `https://drive.google.com/file/d/${track.video.id}/preview`;
-    iframe.setAttribute('allow', 'autoplay');
-    els.mediaFrame.appendChild(iframe);
-    els.playerControls.innerHTML = `<span class="pill on">映像再生中（オンライン）</span>`;
+    els.videoFrame.src = `https://drive.google.com/file/d/${track.video.id}/preview`;
+    els.videoFrame.classList.add('show');
+    els.playModePill.textContent = '映像再生中（オンライン）';
+    els.playModePill.classList.add('on');
     return;
   }
 
-  // ---- オフライン、または映像なし: 音声再生 ----
   const saved = await dbGet(trackId);
 
   if (saved) {
     const url = URL.createObjectURL(saved.blob);
-    setupAudioPlayer(url, '保存した音声を再生中');
+    setupAudioPlayer(url, '保存した音声を再生中', track.title.trim());
     return;
   }
 
   if (navigator.onLine && track.audio) {
-    // 未保存だがオンライン: GAS経由でストリーム取得して再生（保存はしない）
-    els.playerControls.innerHTML = `<span class="pill">読み込み中…</span>`;
+    els.audioStage.classList.add('show');
+    els.audioStageTitle.textContent = '読み込み中…';
+    els.playModePill.textContent = '読み込み中…';
+    els.playModePill.classList.remove('on');
     try {
       const res = await fetch(`${GAS_URL}?action=stream&id=${track.audio.id}`);
       const data = await res.json();
       const blob = base64ToBlob(data.base64, data.mime);
       const url = URL.createObjectURL(blob);
-      setupAudioPlayer(url, '音声を再生中（オンライン）');
+      setupAudioPlayer(url, '音声を再生中（オンライン）', track.title.trim());
     } catch (err) {
-      els.playerControls.innerHTML = `<span class="pill">音声の取得に失敗しました</span>`;
+      els.playModePill.textContent = '音声の取得に失敗しました';
+      els.audioStageTitle.textContent = '取得に失敗しました';
     }
     return;
   }
 
   // オフラインかつ未保存
-  els.mediaFrame.classList.add('audio-only');
-  els.mediaFrame.innerHTML = buildWaveform(true);
-  els.playerControls.innerHTML = `<span class="pill">オフラインのため再生できません（未保存）</span>`;
+  els.audioStage.classList.add('show');
+  els.audioStageTitle.textContent = `${track.title.trim()}\n（未保存のためオフラインで再生できません）`;
+  els.playModePill.textContent = 'オフライン・未保存';
+  els.playModePill.classList.remove('on');
 }
 
-function setupAudioPlayer(url, label) {
-  els.mediaFrame.classList.add('audio-only');
-  els.mediaFrame.innerHTML = buildWaveform(false);
+function setupAudioPlayer(url, label, title) {
+  els.audioStage.classList.add('show');
+  els.audioStageTitle.textContent = title;
 
   els.audioEl.src = url;
-  els.audioEl.classList.remove('hidden');
   els.audioEl.play().catch(() => {});
 
-  els.playerControls.innerHTML = `<span class="pill on">${label}</span>`;
+  els.playModePill.textContent = label;
+  els.playModePill.classList.add('on');
 
-  const waveform = els.mediaFrame.querySelector('.waveform');
-  els.audioEl.onplay = () => waveform && waveform.classList.remove('paused');
-  els.audioEl.onpause = () => waveform && waveform.classList.add('paused');
-}
+  els.disc.classList.add('spin');
+  els.waveform.classList.remove('paused');
 
-function buildWaveform(paused) {
-  return `<div class="waveform ${paused ? 'paused' : ''}">
-    ${Array.from({ length: 7 }).map(() => '<div class="bar"></div>').join('')}
-  </div>`;
+  els.audioEl.onpause = () => {
+    els.disc.classList.remove('spin');
+    els.waveform.classList.add('paused');
+  };
+  els.audioEl.onplay = () => {
+    els.disc.classList.add('spin');
+    els.waveform.classList.remove('paused');
+  };
 }
 
 function base64ToBlob(base64, mime) {
@@ -333,7 +348,7 @@ async function toggleSave(trackId) {
 
     await dbPut({
       id: trackId,
-      title: track.title,
+      title: track.title.trim(),
       mime: data.mime,
       blob: blob,
       savedAt: Date.now()
