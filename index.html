@@ -93,17 +93,22 @@
     opacity: 0.7;
   }
 
-  /* 動画iframe */
-  #video-frame{
+  /* 動画iframe：video-wrapの中にflex子要素として配置 */
+  #video-wrap{
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
     display: none;
+    flex-direction: column;
     background: #000;
   }
-  #video-frame.show{ display: block; }
+  #video-wrap.show{ display: flex; }
+
+  #video-frame{
+    flex: 1;
+    width: 100%;
+    border: 0;
+    background: #000;
+  }
 
   /* 音声のみ表示（ジャケット風 + 波形） */
   #audio-stage{
@@ -403,14 +408,19 @@
   <div id="stage">
     <div id="status-banner"></div>
 
+    <!-- デフォルト表示（未再生時） -->
     <div id="stage-brand">
       <div class="mark">●</div>
       <div class="brand-text">OTOBAKO</div>
       <div class="tagline">映像はオンラインで。音だけを、持ち歩く。</div>
     </div>
 
-    <iframe id="video-frame" allow="autoplay; fullscreen"></iframe>
+    <!-- 動画: iframeはステージの上部80%を占める -->
+    <div id="video-wrap">
+      <iframe id="video-frame" allow="autoplay; fullscreen"></iframe>
+    </div>
 
+    <!-- 音声再生UI -->
     <div id="audio-stage">
       <div class="disc"><div class="disc-core"></div></div>
       <div class="waveform">
@@ -427,6 +437,7 @@
 
     <audio id="audio-el"></audio>
 
+    <!-- 曲名バー（常に下部に表示） -->
     <div id="stage-info">
       <span class="now-title" id="now-title"></span>
     </div>
