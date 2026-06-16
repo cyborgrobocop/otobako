@@ -9,6 +9,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbyBVswH3dx-jGkbEX-17JXN
 const els = {
   statusBanner: document.getElementById('status-banner'),
   stageBrand: document.getElementById('stage-brand'),
+  videoWrap: document.getElementById('video-wrap'),
   videoFrame: document.getElementById('video-frame'),
   audioStage: document.getElementById('audio-stage'),
   audioStageTitle: document.getElementById('audio-stage-title'),
@@ -239,7 +240,7 @@ async function playTrack(trackId) {
   renderTrackList();
 
   els.stageBrand.classList.add('hidden');
-  els.videoFrame.classList.remove('show');
+  els.videoWrap.classList.remove('show');
   els.videoFrame.src = '';
   els.audioStage.classList.remove('show');
   els.disc.classList.remove('spin');
@@ -250,7 +251,7 @@ async function playTrack(trackId) {
 
   if (navigator.onLine && track.video) {
     els.videoFrame.src = `https://drive.google.com/file/d/${track.video.id}/preview`;
-    els.videoFrame.classList.add('show');
+    els.videoWrap.classList.add('show');
     if ('mediaSession' in navigator) {
       navigator.mediaSession.playbackState = 'none';
       navigator.mediaSession.metadata = null;
@@ -298,7 +299,7 @@ async function playTrackOffline(trackId) {
   renderTrackList();
 
   els.stageBrand.classList.add('hidden');
-  els.videoFrame.classList.remove('show');
+  els.videoWrap.classList.remove('show');
   els.videoFrame.src = '';
   els.audioStage.classList.remove('show');
   els.disc.classList.remove('spin');
