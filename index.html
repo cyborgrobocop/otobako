@@ -291,6 +291,15 @@
     box-shadow: 0 0 22px var(--accent-glow);
   }
 
+  #shuffle-btn .icon {
+    font-size: 0.9rem;
+  }
+  #shuffle-btn.active .icon {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
   /* オフラインバナー */
   #status-banner {
     position: absolute;
@@ -492,6 +501,10 @@
       <button class="ctrl-btn" id="fwd-btn">
         <div class="icon">↻</div>
         <span class="label">5秒送り</span>
+      </button>
+      <button class="ctrl-btn" id="shuffle-btn">
+        <div class="icon">⇄</div>
+        <span class="label" id="shuffle-label">シャッフル</span>
       </button>
     </div>
     <audio id="audio-el"></audio>
