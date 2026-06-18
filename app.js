@@ -432,6 +432,7 @@ async function playTrack(trackId) {
   renderTrackList();
   els.nowTitle.textContent = track.title;
   els.nowArtist.textContent = track.artist || '';
+  updateStageBg(track);
 
   initAudioContext();
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -455,6 +456,7 @@ async function playTrackOffline(trackId) {
   renderTrackList();
   els.nowTitle.textContent = track.title;
   els.nowArtist.textContent = track.artist || '';
+  updateStageBg(track);
 
   initAudioContext();
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -544,6 +546,18 @@ function playAdjacentTrack(dir) {
 // ============================================================
 // Media Session（バックグラウンド再生）
 // ============================================================
+// ============================================================
+// 背景画像切り替え（曲ごと）
+// ============================================================
+function updateStageBg(track) {
+  const stage = document.getElementById('stage');
+  if (track.bg) {
+    stage.style.backgroundImage = `url('${track.bg}')`;
+  } else {
+    stage.style.backgroundImage = '';
+  }
+}
+
 function updateMediaSession(track) {
   if (!('mediaSession' in navigator)) return;
   navigator.mediaSession.metadata = new MediaMetadata({
