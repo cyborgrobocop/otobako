@@ -4,26 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#13151A">
-<title>Otobako - 持ち歩く音の箱</title>
+<title>Otobako</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <style>
-  :root{
-    --bg: #13151A;
-    --panel: #1B1E26;
-    --panel-raised: #232733;
-    --text: #F2EDE4;
-    --text-dim: #9AA0AC;
-    --accent: #D9A24B;
-    --accent-soft: rgba(217, 162, 75, 0.16);
-    --line: #2C313D;
-    --ok: #5A6B5D;
+  :root {
+    --bg:           #13151A;
+    --surface:      #1B1E26;
+    --surface2:     #232733;
+    --text:         #F2EDE4;
+    --text-dim:     #9AA0AC;
+    --accent:       #D9A24B;
+    --accent-soft:  rgba(217, 162, 75, 0.15);
+    --accent-glow:  rgba(217, 162, 75, 0.35);
+    --ok:           #5A6B5D;
+    --line:         #2C313D;
+    --error:        #E07070;
   }
 
-  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
 
-  html, body{
-    margin: 0;
+  html, body {
     height: 100%;
     background: var(--bg);
     color: var(--text);
@@ -33,156 +34,178 @@
   }
 
   /* ============================================================
-     全体: 縦いっぱい固定。上半分=再生ステージ／下半分=リスト
-     ============================================================ */
-  #app{
+     ログイン画面
+  ============================================================ */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(217,162,75,0.12), transparent 60%),
+      var(--bg);
+    z-index: 100;
+    padding: 32px 24px;
+  }
+  #login-screen.hidden { display: none; }
+
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .login-logo .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .login-logo h1 {
+    font-size: 1.7rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: var(--text);
+  }
+  .login-tagline {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 40px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 340px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .login-field label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .login-field input {
+    background: var(--surface2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 0.95rem;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .login-field input:focus {
+    border-color: var(--accent);
+  }
+
+  #login-error {
+    font-size: 0.75rem;
+    color: var(--error);
+    text-align: center;
+    min-height: 1.2em;
+  }
+
+  #login-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  #login-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+  /* ============================================================
+     メインアプリ
+  ============================================================ */
+  #app {
     position: fixed;
     inset: 0;
     display: flex;
     flex-direction: column;
   }
+  #app.hidden { display: none; }
 
-  /* ===== 上半分: ステージ ===== */
-  #stage{
+  /* ==============================
+     上半分: ビジュアライザー + コントロール
+  ============================== */
+  #stage {
     flex: 0 0 50%;
     position: relative;
     display: flex;
     flex-direction: column;
-    background: #000;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
+    background: radial-gradient(ellipse at 50% 55%, rgba(217,162,75,0.08), transparent 65%),
+                var(--bg);
   }
 
-  /* ブランド表示（再生前のデフォルト表示） */
-  #stage-brand{
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(217,162,75,0.18), transparent 55%),
-      linear-gradient(160deg, #1B1E26 0%, #0E1014 100%);
-    transition: opacity 0.3s ease;
-  }
-  #stage-brand.hidden{ opacity: 0; pointer-events: none; }
-
-  #stage-brand .mark{
-    width: 56px;
-    height: 56px;
-    border-radius: 999px;
-    background: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: var(--bg);
-    font-weight: 700;
-  }
-  #stage-brand .brand-text{
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
-    color: var(--text-dim);
-  }
-  #stage-brand .tagline{
-    font-size: 0.78rem;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
-    opacity: 0.7;
+  #visualizer {
+    width: 200px;
+    height: 200px;
+    flex-shrink: 0;
   }
 
-  /* 動画iframe：video-wrapの中にflex子要素として配置 */
-  #video-wrap{
-    position: absolute;
-    inset: 0;
-    display: none;
-    flex-direction: column;
-    background: #000;
-  }
-  #video-wrap.show{ display: flex; }
-
-  #video-frame{
-    flex: 1;
-    width: 100%;
-    border: 0;
-    background: #000;
-  }
-
-  /* 音声のみ表示（ジャケット風 + 波形） */
-  #audio-stage{
-    position: absolute;
-    inset: 0;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 22px;
-    background:
-      radial-gradient(circle at 70% 25%, rgba(217,162,75,0.20), transparent 50%),
-      linear-gradient(160deg, #232733 0%, #0E1014 100%);
-    padding: 24px;
+  #now-info {
     text-align: center;
+    padding: 10px 24px 0;
+    max-width: 100%;
   }
-  #audio-stage.show{ display: flex; }
-
-  #audio-stage .disc{
-    width: 132px;
-    height: 132px;
-    border-radius: 999px;
-    background: linear-gradient(145deg, var(--panel-raised), #11131A);
-    border: 1px solid var(--line);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  }
-  #audio-stage .disc-core{
-    width: 30px;
-    height: 30px;
-    border-radius: 999px;
-    background: var(--accent);
-  }
-  #audio-stage .disc.spin{
-    animation: spin 6s linear infinite;
-  }
-  @keyframes spin{ to{ transform: rotate(360deg); } }
-
-  #audio-stage .stage-title{
-    font-size: 1rem;
+  #now-title {
+    font-size: 0.92rem;
     font-weight: 700;
-    max-width: 280px;
-    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 88vw;
+  }
+  #now-artist {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    margin-top: 3px;
   }
 
   /* シークバー */
-  #seek-bar-wrap{
+  #seek-wrap {
+    width: 88vw;
+    max-width: 360px;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+  }
+  #seek-bar {
     width: 100%;
-    max-width: 320px;
-    padding: 0 8px;
-  }
-  .seek-time{
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    flex-shrink: 0;
-    min-width: 36px;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-  }
-  #seek-bar{
-    flex: 1;
     -webkit-appearance: none;
     appearance: none;
-    height: 4px;
+    height: 3px;
     border-radius: 999px;
     background: var(--line);
     outline: none;
   }
-  #seek-bar::-webkit-slider-thumb{
+  #seek-bar::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 14px;
     height: 14px;
@@ -190,276 +213,284 @@
     background: var(--accent);
     cursor: pointer;
   }
-  #seek-bar::-moz-range-thumb{
-    width: 14px;
-    height: 14px;
-    border: none;
-    border-radius: 999px;
-    background: var(--accent);
-    cursor: pointer;
+  #seek-bar::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border: none; border-radius: 999px;
+    background: var(--accent); cursor: pointer;
+  }
+  #seek-times {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
   }
 
-  /* 波形 */
-  .waveform{
+  /* コントロールボタン */
+  #controls {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 28px;
+    margin-top: 14px;
+  }
+  .ctrl-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: 4px;
-    height: 36px;
+    cursor: pointer;
   }
-  .waveform .bar{
-    width: 4px;
-    border-radius: 2px;
-    background: var(--accent);
-    opacity: 0.85;
-    animation: wave 1.1s ease-in-out infinite;
-  }
-  .waveform .bar:nth-child(1){ height: 14px; animation-delay: -1.1s; }
-  .waveform .bar:nth-child(2){ height: 28px; animation-delay: -0.9s; }
-  .waveform .bar:nth-child(3){ height: 36px; animation-delay: -0.7s; }
-  .waveform .bar:nth-child(4){ height: 20px; animation-delay: -0.5s; }
-  .waveform .bar:nth-child(5){ height: 32px; animation-delay: -0.3s; }
-  .waveform .bar:nth-child(6){ height: 18px; animation-delay: -0.1s; }
-  .waveform .bar:nth-child(7){ height: 24px; animation-delay: -0.2s; }
-  @keyframes wave{ 0%, 100%{ transform: scaleY(0.4); } 50%{ transform: scaleY(1); } }
-  .waveform.paused .bar{ animation-play-state: paused; opacity: 0.3; }
-
-  /* ステージ下部の情報バー */
-  #stage-info{
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    padding: 12px 16px;
+  .ctrl-btn .icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: var(--surface);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
-    font-size: 0.74rem;
+    justify-content: center;
+    font-size: 1rem;
+  }
+  .ctrl-btn .label {
+    font-size: 0.6rem;
     color: var(--text-dim);
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    letter-spacing: 0.04em;
   }
-  #stage-info.show{ opacity: 1; }
+  .ctrl-btn:active .icon { transform: scale(0.93); }
 
-  #stage-info .now-title{
-    color: var(--text);
-    font-weight: 600;
-    font-size: 0.82rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  #play-btn .icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.4rem;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 22px var(--accent-glow);
   }
-
-  audio#audio-el{ display: none; }
 
   /* オフラインバナー */
-  #status-banner{
+  #status-banner {
     position: absolute;
-    top: 12px;
+    top: 10px;
     left: 16px;
     right: 16px;
-    font-size: 0.72rem;
-    padding: 6px 10px;
+    font-size: 0.7rem;
+    padding: 5px 10px;
     border-radius: 8px;
     background: var(--accent-soft);
     color: var(--accent);
     text-align: center;
     display: none;
-    z-index: 5;
   }
-  #status-banner.show{ display: block; }
+  #status-banner.show { display: block; }
 
-  /* ===== 下半分: リスト ===== */
-  #list-pane{
+  /* ==============================
+     下半分: プレイリスト
+  ============================== */
+  #list-pane {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
     border-top: 1px solid var(--line);
-    background: var(--bg);
   }
 
-  #list-header{
+  #list-header {
     flex-shrink: 0;
     padding: 10px 16px 8px;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--line);
   }
-  #list-header h2{
-    margin: 0;
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
+  #list-header h2 {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
     color: var(--text-dim);
     text-transform: uppercase;
+    font-weight: 600;
   }
-  #list-header .count{
-    font-size: 0.72rem;
+  #list-header .right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #list-header .count { font-size: 0.7rem; color: var(--text-dim); }
+  #logout-btn {
+    font-size: 0.68rem;
     color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 3px 9px;
+    cursor: pointer;
   }
 
-  #track-list{
+  #track-list {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
 
-  #loading-state, #error-state, #empty-state{
+  #loading-state, #error-state, #empty-state {
     text-align: center;
     color: var(--text-dim);
-    font-size: 0.85rem;
-    padding: 40px 20px;
+    font-size: 0.82rem;
+    padding: 32px 20px;
     line-height: 1.7;
   }
-  #error-state{ display: none; color: var(--accent); }
-  #empty-state{ display: none; }
+  #error-state { display: none; color: var(--error); }
+  #empty-state  { display: none; }
 
-  .track-row{
+  .track-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 13px 16px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--line);
     cursor: pointer;
-    transition: background 0.12s ease;
+    transition: background 0.1s;
   }
-  .track-row:active{ background: var(--panel); }
-  .track-row.playing{
-    background: var(--accent-soft);
-  }
+  .track-row:active { background: var(--surface); }
+  .track-row.playing { background: var(--accent-soft); }
 
-  .track-row .idx{
-    width: 22px;
-    flex-shrink: 0;
+  .track-row .idx {
+    width: 20px;
     text-align: center;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     color: var(--text-dim);
+    flex-shrink: 0;
   }
-  .track-row.playing .idx{ color: var(--accent); }
+  .track-row.playing .idx { color: var(--accent); }
 
-  .track-row .meta{
-    flex: 1;
-    min-width: 0;
-  }
-  .track-row .meta .name{
-    font-size: 0.92rem;
+  .track-row .meta { flex: 1; min-width: 0; }
+  .track-row .meta .name {
+    font-size: 0.9rem;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .track-row.playing .meta .name{ color: var(--accent); }
-
-  .track-row .meta .sub{
-    font-size: 0.7rem;
+  .track-row.playing .meta .name { color: var(--accent); }
+  .track-row .meta .sub {
+    font-size: 0.68rem;
     color: var(--text-dim);
     margin-top: 2px;
   }
 
-  .action-btn{
+  .action-btn {
     flex-shrink: 0;
-    width: 34px;
-    height: 34px;
+    width: 34px; height: 34px;
     border-radius: 999px;
     border: 1px solid var(--line);
     background: transparent;
     color: var(--text-dim);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   }
-  .action-btn:disabled{
-    opacity: 0.3;
-  }
-  .action-btn.saved{
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .action-btn:not(:disabled):active{ transform: scale(0.92); }
+  .action-btn.saved { border-color: var(--ok); color: var(--ok); }
+  .action-btn:disabled { opacity: 0.3; }
+  .action-btn:not(:disabled):active { transform: scale(0.92); }
 
-  /* ===== フッター（保存容量） ===== */
-  #list-footer{
+  #list-footer {
     flex-shrink: 0;
     border-top: 1px solid var(--line);
     padding: 8px 16px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--text-dim);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  #list-footer button{
+  #list-footer button {
     background: none;
     border: 1px solid var(--line);
     color: var(--text-dim);
     border-radius: 8px;
     padding: 4px 10px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
+    cursor: pointer;
   }
 </style>
 </head>
 <body>
 
-<div id="app">
+<!-- ===== ログイン画面 ===== -->
+<div id="login-screen">
+  <div class="login-logo">
+    <div class="dot"></div>
+    <h1>OTOBAKO</h1>
+  </div>
+  <p class="login-tagline">音だけを、持ち歩く。</p>
 
-  <!-- ===== 上半分: ステージ ===== -->
+  <div class="login-card">
+    <div class="login-field">
+      <label>ID</label>
+      <input type="text" id="login-id" placeholder="IDを入力" autocomplete="username" autocorrect="off" autocapitalize="none">
+    </div>
+    <div class="login-field">
+      <label>パスワード</label>
+      <input type="password" id="login-pw" placeholder="パスワードを入力" autocomplete="current-password">
+    </div>
+    <div id="login-error"></div>
+    <button id="login-btn">ログイン</button>
+  </div>
+</div>
+
+<!-- ===== メインアプリ ===== -->
+<div id="app" class="hidden">
+
   <div id="stage">
     <div id="status-banner"></div>
-
-    <!-- デフォルト表示（未再生時） -->
-    <div id="stage-brand">
-      <div class="mark">●</div>
-      <div class="brand-text">OTOBAKO</div>
-      <div class="tagline">映像はオンラインで。音だけを、持ち歩く。</div>
+    <canvas id="visualizer" width="200" height="200"></canvas>
+    <div id="now-info">
+      <div id="now-title">曲を選んでください</div>
+      <div id="now-artist"></div>
     </div>
-
-    <!-- 動画: iframeはステージの上部80%を占める -->
-    <div id="video-wrap">
-      <iframe id="video-frame" allow="autoplay; fullscreen"></iframe>
-    </div>
-
-    <!-- 音声再生UI -->
-    <div id="audio-stage">
-      <div class="disc"><div class="disc-core"></div></div>
-      <div class="waveform">
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-      </div>
-      <div class="stage-title" id="audio-stage-title"></div>
-      <div id="seek-bar-wrap">
-        <span class="seek-time" id="seek-current">0:00</span>
-        <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1">
-        <span class="seek-time" id="seek-duration">0:00</span>
+    <div id="seek-wrap">
+      <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1">
+      <div id="seek-times">
+        <span id="seek-current">0:00</span>
+        <span id="seek-duration">0:00</span>
       </div>
     </div>
-
+    <div id="controls">
+      <button class="ctrl-btn" id="back-btn">
+        <div class="icon">↺</div>
+        <span class="label">5秒戻し</span>
+      </button>
+      <button class="ctrl-btn" id="play-btn">
+        <div class="icon" id="play-icon">▶</div>
+        <span class="label" id="play-label">再生</span>
+      </button>
+      <button class="ctrl-btn" id="fwd-btn">
+        <div class="icon">↻</div>
+        <span class="label">5秒送り</span>
+      </button>
+    </div>
     <audio id="audio-el"></audio>
-
-    <!-- 曲名バー（常に下部に表示） -->
-    <div id="stage-info">
-      <span class="now-title" id="now-title"></span>
-    </div>
   </div>
 
-  <!-- ===== 下半分: リスト ===== -->
   <div id="list-pane">
     <div id="list-header">
       <h2>プレイリスト</h2>
-      <span class="count" id="track-count"></span>
+      <div class="right">
+        <span class="count" id="track-count"></span>
+        <button id="logout-btn">ログアウト</button>
+      </div>
     </div>
-
     <div id="track-list">
       <div id="loading-state">読み込み中…</div>
       <div id="error-state"></div>
-      <div id="empty-state">
-        まだ曲が登録されていません。<br>
-        Driveに動画(.mp4)と音声(.mp3)を<br>
-        同名で入れてください。
-      </div>
+      <div id="empty-state">music/playlist.json に曲を追加してください。</div>
     </div>
-
     <div id="list-footer">
       <span id="storage-info">保存容量: 取得中…</span>
       <button id="clear-btn">保存を削除</button>
