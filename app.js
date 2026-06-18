@@ -114,6 +114,8 @@ const els = {
   playIcon:     document.getElementById('play-icon'),
   playLabel:    document.getElementById('play-label'),
   fwdBtn:       document.getElementById('fwd-btn'),
+  shuffleBtn:   document.getElementById('shuffle-btn'),
+  shuffleLabel: document.getElementById('shuffle-label'),
   audioEl:      document.getElementById('audio-el'),
   trackCount:   document.getElementById('track-count'),
   loadingState: document.getElementById('loading-state'),
@@ -535,13 +537,32 @@ function formatTime(sec) {
 }
 
 // ============================================================
-// 前後の曲
 // ============================================================
+// 前後の曲 / シャッフル
+// ============================================================
+let isShuffleOn = false;
+
 function playAdjacentTrack(dir) {
-  const idx = tracks.findIndex(t => t.id === currentTrackId);
-  if (idx === -1) return;
-  playTrack(tracks[(idx + dir + tracks.length) % tracks.length].id);
+  if (tracks.length === 0) return;
+  if (isShuffleOn) {
+    // シャッフルON: 現在の曲以外からランダムに選ぶ
+    const others = tracks.filter(t => t.id !== currentTrackId);
+    const next = others.length > 0
+      ? others[Math.floor(Math.random() * others.length)]
+      : tracks[0];
+    playTrack(next.id);
+  } else {
+    const idx = tracks.findIndex(t => t.id === currentTrackId);
+    if (idx === -1) return;
+    playTrack(tracks[(idx + dir + tracks.length) % tracks.length].id);
+  }
 }
+
+els.shuffleBtn.addEventListener('click', () => {
+  isShuffleOn = !isShuffleOn;
+  els.shuffleBtn.classList.toggle('active', isShuffleOn);
+  els.shuffleLabel.textContent = isShuffleOn ? 'ON' : 'シャッフル';
+});
 
 // ============================================================
 // Media Session（バックグラウンド再生）
