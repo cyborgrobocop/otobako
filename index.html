@@ -150,17 +150,18 @@
   /* ==============================
      上半分: ビジュアライザー + コントロール
   ============================== */
-  #stage {
-    flex: 0 0 50%;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    background: radial-gradient(ellipse at 50% 55%, rgba(217,162,75,0.08), transparent 65%),
-                var(--bg);
-  }
+#stage {
+  flex: 0 0 50%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background:
+    linear-gradient(to bottom, rgba(19,21,26,0.45), rgba(19,21,26,0.65)),
+    url('./bg.jpg') center/cover no-repeat;
+}
 
   #visualizer {
     width: 200px;
