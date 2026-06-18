@@ -150,18 +150,36 @@
   /* ==============================
      上半分: ビジュアライザー + コントロール
   ============================== */
-#stage {
-  flex: 0 0 50%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background:
-    linear-gradient(to bottom, rgba(19,21,26,0.45), rgba(19,21,26,0.65)),
-    url('./bg.jpg') center/cover no-repeat;
-}
+  #stage {
+    flex: 0 0 50%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: var(--bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 0.4s ease;
+  }
+
+  /* 背景画像の上に暗いオーバーレイ（ビジュアライザーを見やすくする） */
+  #stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(19, 21, 26, 0.55),
+      rgba(19, 21, 26, 0.70)
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ステージ内の要素をオーバーレイより前面に */
+  #stage > * { position: relative; z-index: 1; }
 
   #visualizer {
     width: 200px;
