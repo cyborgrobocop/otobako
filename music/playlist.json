@@ -3,14 +3,14 @@
     {
       "id": "track001",
       "title": "四次元ポッケに比べたら (from「もらいもん」)",
-      "artist": "",
+      "artist": "B子",
       "file": "./music/四次元ポッケに比べたらfrom「もらいもん」.mp3"
     },
     {
       "id": "track002",
-      "title": "2曲目のタイトル",
-      "artist": "アーティスト名",
-      "file": "./music/2曲目のファイル名.mp3"
+      "title": "もらいもんからの四次元ポッケに比べたら .MP3",
+      "artist": "B子",
+      "file": "./music/もらいもんからの四次元ポッケに比べたら .MP3"
     },
     {
       "id": "track003",
