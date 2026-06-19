@@ -12,7 +12,7 @@
       "title": "徽菌（ばいきん）THE FIRST TAKE",
       "artist": "B子",
       "file": "./music/徽菌THEFIRSTTAKE.MP3",
-      "bg": "./bk/徽菌THEFIRSTTAKE.png"
+      "bg": "./bk/菌THEFIRSTTAKE.png"
     },
     {
       "id": "track003",
@@ -47,7 +47,7 @@
       "title": "【LIVE版】黴菌(ばいきん)",
       "artist": "B子",
       "file": "./music/LIVE版黴菌.MP3",
-      "bg": "./bk/LIVE版黴菌.png"
+      "bg": "./bk/LIVE版菌.png"
     },
     {
       "id": "track008",
