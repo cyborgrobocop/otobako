@@ -11,8 +11,8 @@
       "id": "track002",
       "title": "もらいもん  のび太 ＆ ジャイアン ＆ スネ夫",
       "artist": "B子",
-      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
-      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
+      "file": "./music/もらいもん.MP3",
+      "bg": "./bk/もらいもん.png"
     },
     {
       "id": "track003",
@@ -60,8 +60,8 @@
       "id": "track009",
       "title": "NHK狂育讃歌 / THE FIRST TAKE",
       "artist": "B子",
-      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
-      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
+      "file": "./music/NHK狂育.MP3",
+      "bg": "./bk/NHK狂育.png"
     },
     {
       "id": "track010",
