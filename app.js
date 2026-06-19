@@ -138,49 +138,15 @@ let currentTrackId = null;
 let savedIds = new Set();
 
 // ============================================================
-// ビジュアライザー（Web Audio API・音に反応する円形）
-// フォアグラウンド時のみ動作。バックグラウンド時は自動停止し
-// <audio>要素が直接OSのメディアセッションを担当するため
-// バックグラウンド再生は維持される。
+// ビジュアライザー（波打つアニメーション・AudioContext不使用）
+// バックグラウンド再生優先のためWeb Audio APIは使わない
 // ============================================================
-let audioCtx = null;
-let analyser = null;
-let source = null;
 let vizAnimId = null;
 let isVisualizerRunning = false;
-
-function initAudioContext() {
-  if (audioCtx) return;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 128;
-    analyser.smoothingTimeConstant = 0.82;
-    // <audio>とAnalyserを繋ぐ（出力先はAnalyser経由でdestinationへ）
-    source = audioCtx.createMediaElementSource(els.audioEl);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-  } catch (e) {
-    audioCtx = null;
-  }
-}
-
-// バックグラウンド時はvisibilitychangeでCanvasのrAFを止める
-// （<audio>の再生は止めない）
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    // バックグラウンド: ビジュアライザーのアニメーションだけ止める
-    if (vizAnimId) { cancelAnimationFrame(vizAnimId); vizAnimId = null; }
-    isVisualizerRunning = false;
-  } else {
-    // フォアグラウンド復帰: 再生中ならビジュアライザー再開
-    if (!els.audioEl.paused) startVisualizer();
-  }
-});
+let vizPhase = 0;
 
 function startVisualizer() {
   if (isVisualizerRunning) return;
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   isVisualizerRunning = true;
   drawFrame();
 }
@@ -198,9 +164,7 @@ function drawIdle() {
   const cx = W / 2, cy = H / 2;
   const baseR = W * 0.28;
   const bars = 48;
-
   ctx.clearRect(0, 0, W, H);
-
   const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, baseR);
   grd.addColorStop(0, 'rgba(217, 162, 75, 0.18)');
   grd.addColorStop(1, 'rgba(217, 162, 75, 0.03)');
@@ -208,87 +172,57 @@ function drawIdle() {
   ctx.arc(cx, cy, baseR, 0, Math.PI * 2);
   ctx.fillStyle = grd;
   ctx.fill();
-
   ctx.beginPath();
   ctx.arc(cx, cy, baseR + 18, 0, Math.PI * 2);
   ctx.strokeStyle = 'rgba(217, 162, 75, 0.12)';
   ctx.lineWidth = 1;
   ctx.stroke();
-
   for (let i = 0; i < bars; i++) {
     const angle = (i / bars) * Math.PI * 2 - Math.PI / 2;
     const x1 = cx + Math.cos(angle) * (baseR + 2);
     const y1 = cy + Math.sin(angle) * (baseR + 2);
     const x2 = cx + Math.cos(angle) * (baseR + 6);
     const y2 = cy + Math.sin(angle) * (baseR + 6);
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
     ctx.strokeStyle = 'rgba(217, 162, 75, 0.25)';
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.stroke();
+    ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke();
   }
 }
 
 function drawFrame() {
   if (!isVisualizerRunning) return;
   vizAnimId = requestAnimationFrame(drawFrame);
-
+  vizPhase += 0.04;
   const canvas = els.visualizer;
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   const cx = W / 2, cy = H / 2;
   const baseR = W * 0.28;
   const bars = 48;
-
-  // analyserがない場合はアイドル表示
-  if (!analyser) { drawIdle(); return; }
-
-  const dataArr = new Uint8Array(analyser.frequencyBinCount);
-  analyser.getByteFrequencyData(dataArr);
-
   ctx.clearRect(0, 0, W, H);
-
-  const avgVol = dataArr.reduce((a, b) => a + b, 0) / dataArr.length;
-
-  const glowR = baseR * (0.9 + (avgVol / 255) * 0.2);
+  const pulse = 0.9 + Math.sin(vizPhase) * 0.1;
+  const glowR = baseR * pulse;
   const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-  grd.addColorStop(0, `rgba(217, 162, 75, ${0.12 + (avgVol / 255) * 0.22})`);
+  grd.addColorStop(0, `rgba(217, 162, 75, ${0.2 + Math.sin(vizPhase) * 0.08})`);
   grd.addColorStop(1, 'rgba(217, 162, 75, 0.02)');
-  ctx.beginPath();
-  ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
-  ctx.fillStyle = grd;
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, baseR, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(217, 162, 75, 0.2)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
+  ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+  ctx.fillStyle = grd; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx, cy, baseR, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(217, 162, 75, 0.2)'; ctx.lineWidth = 1; ctx.stroke();
   for (let i = 0; i < bars; i++) {
-    const dataIndex = Math.floor((i / bars) * dataArr.length * 0.75);
-    const val = dataArr[dataIndex] / 255;
-    const barH = 5 + val * (W * 0.30);
     const angle = (i / bars) * Math.PI * 2 - Math.PI / 2;
-
-    const hue = 30 + val * 20;
-    const lightness = 55 + val * 15;
-    const alpha = 0.45 + val * 0.55;
-
+    const wave = Math.abs(Math.sin(vizPhase + (i / bars) * Math.PI * 4));
+    const barH = 5 + wave * (W * 0.22);
+    const hue = 30 + wave * 20;
+    const lightness = 55 + wave * 15;
+    const alpha = 0.4 + wave * 0.6;
     const x1 = cx + Math.cos(angle) * (baseR + 3);
     const y1 = cy + Math.sin(angle) * (baseR + 3);
     const x2 = cx + Math.cos(angle) * (baseR + 3 + barH);
     const y2 = cy + Math.sin(angle) * (baseR + 3 + barH);
-
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
     ctx.strokeStyle = `hsla(${hue}, 85%, ${lightness}%, ${alpha})`;
-    ctx.lineWidth = 2.5;
-    ctx.lineCap = 'round';
-    ctx.stroke();
+    ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.stroke();
   }
 }
 
@@ -460,7 +394,6 @@ async function playTrack(trackId) {
   els.nowArtist.textContent = track.artist || '';
   updateStageBg(track);
 
-  initAudioContext();
   els.audioEl.src = track.file;
   els.audioEl.play().catch(() => {});
   startVisualizer();
@@ -483,7 +416,6 @@ async function playTrackOffline(trackId) {
   els.nowArtist.textContent = track.artist || '';
   updateStageBg(track);
 
-  initAudioContext();
   els.audioEl.src = URL.createObjectURL(saved.blob);
   els.audioEl.play().catch(() => {});
   startVisualizer();
