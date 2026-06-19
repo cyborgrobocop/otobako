@@ -1,10 +1,16 @@
 // ============================================================
 // 認証設定（SHA-256ハッシュ値。元の文字列はここには存在しない）
 // ============================================================
-const AUTH = {
-  idHash: '5b58364478de8d6689f717a7a8a839f8c0fe16cf76e6fa55b0a959be623e7de4',
-  pwHash: '6b9c0cacfa675d11684a0aaf62cb731e4dcd29943c88544320f477e8086edc8f',
-};
+const AUTH_USERS = [
+  {
+    idHash: '5b58364478de8d6689f717a7a8a839f8c0fe16cf76e6fa55b0a959be623e7de4',
+    pwHash: '6b9c0cacfa675d11684a0aaf62cb731e4dcd29943c88544320f477e8086edc8f',
+  },
+  {
+    idHash: 'af38d105795dbd82689174f0e29a58676eccc7381cb9eef062ed9f8561e5b906',
+    pwHash: '6b9c0cacfa675d11684a0aaf62cb731e4dcd29943c88544320f477e8086edc8f',
+  },
+];
 
 // ============================================================
 // プレイリストの場所
@@ -68,10 +74,11 @@ async function attemptLogin() {
 
   const [idH, pwH] = await Promise.all([sha256(idVal), sha256(pwVal)]);
 
-  // 一定時間待つ（総当たり対策・UX的にも自然）
   await new Promise(r => setTimeout(r, 400));
 
-  if (idH === AUTH.idHash && pwH === AUTH.pwHash) {
+  const matched = AUTH_USERS.some(u => u.idHash === idH && u.pwHash === pwH);
+
+  if (matched) {
     localStorage.setItem('otobako_auth', '1');
     showApp();
   } else {
