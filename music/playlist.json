@@ -12,56 +12,56 @@
       "title": "徽菌（ばいきん）THE FIRST TAKE",
       "artist": "B子",
       "file": "./music/徽菌THEFIRSTTAKE.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track003",
       "title": "最強のヒロイン  THE FIRST TAKE",
       "artist": "B子",
       "file": "./music/最強のヒロイン.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track004",
       "title": "それいけ！あんぱん卍  THE FIRST TAKE",
       "artist": "B子",
       "file": "./music/あんぱん.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track005",
       "title": "水原一平『62億光年の孤独』（五月病なんてぶっ飛ばせLIVE @ ペイペイドーム）",
       "artist": "B子",
       "file": "./music/62億光年の孤独.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track006",
       "title": "「NHK狂育讃歌」HALちゃん Remix",
       "artist": "B子",
       "file": "./music/NHK狂育讃歌.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track007",
       "title": "【LIVE版】黴菌(ばいきん)",
       "artist": "B子",
       "file": "./music/LIVE版黴菌.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track008",
       "title": "【ライブ音源】最強のヒロイン",
       "artist": "B子",
       "file": "./music/ライブ音源最強のヒロイン.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track009",
       "title": "女子キャラサイファーが歌う「のび太サイファー」",
       "artist": "B子",
       "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
-      "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
+      "bg": "./bk/四次元ポッケに比べたらfrom「もらいもん」.png"
     }
   ]
 }
