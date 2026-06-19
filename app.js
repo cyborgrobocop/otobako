@@ -131,22 +131,56 @@ let currentTrackId = null;
 let savedIds = new Set();
 
 // ============================================================
-// ビジュアライザー（CSSアニメーション方式・AudioContext不使用）
-// バックグラウンド再生のためWeb Audio APIを使わない
+// ビジュアライザー（Web Audio API・音に反応する円形）
+// フォアグラウンド時のみ動作。バックグラウンド時は自動停止し
+// <audio>要素が直接OSのメディアセッションを担当するため
+// バックグラウンド再生は維持される。
 // ============================================================
+let audioCtx = null;
+let analyser = null;
+let source = null;
 let vizAnimId = null;
 let isVisualizerRunning = false;
-let vizPhase = 0;
+
+function initAudioContext() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 128;
+    analyser.smoothingTimeConstant = 0.82;
+    // <audio>とAnalyserを繋ぐ（出力先はAnalyser経由でdestinationへ）
+    source = audioCtx.createMediaElementSource(els.audioEl);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+  } catch (e) {
+    audioCtx = null;
+  }
+}
+
+// バックグラウンド時はvisibilitychangeでCanvasのrAFを止める
+// （<audio>の再生は止めない）
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // バックグラウンド: ビジュアライザーのアニメーションだけ止める
+    if (vizAnimId) { cancelAnimationFrame(vizAnimId); vizAnimId = null; }
+    isVisualizerRunning = false;
+  } else {
+    // フォアグラウンド復帰: 再生中ならビジュアライザー再開
+    if (!els.audioEl.paused) startVisualizer();
+  }
+});
 
 function startVisualizer() {
   if (isVisualizerRunning) return;
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   isVisualizerRunning = true;
   drawFrame();
 }
 
 function stopVisualizer() {
   isVisualizerRunning = false;
-  if (vizAnimId) cancelAnimationFrame(vizAnimId);
+  if (vizAnimId) { cancelAnimationFrame(vizAnimId); vizAnimId = null; }
   drawIdle();
 }
 
@@ -193,7 +227,6 @@ function drawIdle() {
 function drawFrame() {
   if (!isVisualizerRunning) return;
   vizAnimId = requestAnimationFrame(drawFrame);
-  vizPhase += 0.04;
 
   const canvas = els.visualizer;
   const ctx = canvas.getContext('2d');
@@ -202,13 +235,19 @@ function drawFrame() {
   const baseR = W * 0.28;
   const bars = 48;
 
+  // analyserがない場合はアイドル表示
+  if (!analyser) { drawIdle(); return; }
+
+  const dataArr = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(dataArr);
+
   ctx.clearRect(0, 0, W, H);
 
-  // 中心の発光円（波打つアニメーション）
-  const pulse = 0.9 + Math.sin(vizPhase) * 0.1;
-  const glowR = baseR * pulse;
+  const avgVol = dataArr.reduce((a, b) => a + b, 0) / dataArr.length;
+
+  const glowR = baseR * (0.9 + (avgVol / 255) * 0.2);
   const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-  grd.addColorStop(0, `rgba(217, 162, 75, ${0.2 + Math.sin(vizPhase) * 0.08})`);
+  grd.addColorStop(0, `rgba(217, 162, 75, ${0.12 + (avgVol / 255) * 0.22})`);
   grd.addColorStop(1, 'rgba(217, 162, 75, 0.02)');
   ctx.beginPath();
   ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
@@ -221,16 +260,15 @@ function drawFrame() {
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // バーを波のように動かす（音に反応しないが動いて見える）
   for (let i = 0; i < bars; i++) {
+    const dataIndex = Math.floor((i / bars) * dataArr.length * 0.75);
+    const val = dataArr[dataIndex] / 255;
+    const barH = 5 + val * (W * 0.30);
     const angle = (i / bars) * Math.PI * 2 - Math.PI / 2;
-    // 各バーが少しずつ位相をずらして波打つ
-    const wave = Math.abs(Math.sin(vizPhase + (i / bars) * Math.PI * 4));
-    const barH = 5 + wave * (W * 0.22);
 
-    const hue = 30 + wave * 20;
-    const lightness = 55 + wave * 15;
-    const alpha = 0.4 + wave * 0.6;
+    const hue = 30 + val * 20;
+    const lightness = 55 + val * 15;
+    const alpha = 0.45 + val * 0.55;
 
     const x1 = cx + Math.cos(angle) * (baseR + 3);
     const y1 = cy + Math.sin(angle) * (baseR + 3);
@@ -415,6 +453,7 @@ async function playTrack(trackId) {
   els.nowArtist.textContent = track.artist || '';
   updateStageBg(track);
 
+  initAudioContext();
   els.audioEl.src = track.file;
   els.audioEl.play().catch(() => {});
   startVisualizer();
@@ -437,6 +476,7 @@ async function playTrackOffline(trackId) {
   els.nowArtist.textContent = track.artist || '';
   updateStageBg(track);
 
+  initAudioContext();
   els.audioEl.src = URL.createObjectURL(saved.blob);
   els.audioEl.play().catch(() => {});
   startVisualizer();
