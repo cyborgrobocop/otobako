@@ -9,24 +9,73 @@
     },
     {
       "id": "track002",
+      "title": "もらいもん  のび太 ＆ ジャイアン ＆ スネ夫",
+      "artist": "B子",
+      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
+      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
+    },
+    {
+      "id": "track003",
       "title": "徽菌（ばいきん）THE FIRST TAKE",
       "artist": "B子",
       "file": "./music/徽菌THEFIRSTTAKE.MP3",
       "bg": "./bk/菌THEFIRSTTAKE.png"
     },
     {
-      "id": "track003",
+      "id": "track004",
       "title": "最強のヒロイン  THE FIRST TAKE",
       "artist": "B子",
       "file": "./music/最強のヒロイン.MP3",
       "bg": "./bk/最強のヒロイン.png"
     },
     {
-      "id": "track004",
+      "id": "track005",
       "title": "それいけ！あんぱん卍  THE FIRST TAKE",
       "artist": "B子",
       "file": "./music/あんぱん.MP3",
       "bg": "./bk/あんぱん.png"
+    },
+    {
+      "id": "track006",
+      "title": "【LIVE版】黴菌(ばいきん)",
+      "artist": "B子",
+      "file": "./music/LIVE版黴菌.MP3",
+      "bg": "./bk/LIVE版菌.png"
+    },
+    {
+      "id": "track007",
+      "title": "【ライブ音源】最強のヒロイン",
+      "artist": "B子",
+      "file": "./music/ライブ音源最強のヒロイン.MP3",
+      "bg": "./bk/ライブ音源最強のヒロイン.png"
+    },
+    {
+      "id": "track008",
+      "title": "女子キャラサイファーが歌う「のび太サイファー」",
+      "artist": "B子",
+      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
+      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
+    },
+    {
+      "id": "track009",
+      "title": "NHK狂育讃歌 / THE FIRST TAKE",
+      "artist": "B子",
+      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
+      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
+    },
+    {
+      "id": "track010",
+      "title": "「NHK狂育讃歌」HALちゃん Remix",
+      "artist": "B子",
+      "file": "./music/NHK狂育讃歌.MP3",
+      "bg": "./bk/NHK狂育讃歌.png"
+    },
+    {
+      "id": "track011",
+      "title": "【おかしラップ選手権】たべっ子HOP vs OTTOTTO【第1章 - 決勝戦 -】",
+      "artist": "B子",
+      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
+      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
     },
     {
       "id": "track005",
@@ -36,51 +85,9 @@
       "bg": "./bk/62億光年の孤独.png"
     },
     {
-      "id": "track006",
-      "title": "「NHK狂育讃歌」HALちゃん Remix",
-      "artist": "B子",
-      "file": "./music/NHK狂育讃歌.MP3",
-      "bg": "./bk/NHK狂育讃歌.png"
-    },
-    {
-      "id": "track007",
-      "title": "【LIVE版】黴菌(ばいきん)",
-      "artist": "B子",
-      "file": "./music/LIVE版黴菌.MP3",
-      "bg": "./bk/LIVE版菌.png"
-    },
-    {
-      "id": "track008",
-      "title": "【ライブ音源】最強のヒロイン",
-      "artist": "B子",
-      "file": "./music/ライブ音源最強のヒロイン.MP3",
-      "bg": "./bk/ライブ音源最強のヒロイン.png"
-    },
-    {
-      "id": "track009",
-      "title": "女子キャラサイファーが歌う「のび太サイファー」",
-      "artist": "B子",
-      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
-      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
-    },
-    {
-      "id": "track010",
-      "title": "【おかしラップ選手権】たべっ子HOP vs OTTOTTO【第1章 - 決勝戦 -】",
-      "artist": "B子",
-      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
-      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
-    },
-    {
       "id": "track011",
       "title": "ジャイアン - 俺はガキ大将  THE FIRST TAKE",
       "artist": "B太郎",
-      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
-      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
-    },
-    {
-      "id": "track012",
-      "title": "もらいもん  のび太 ＆ ジャイアン ＆ スネ夫",
-      "artist": "B子",
       "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
       "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
     },
@@ -98,12 +105,6 @@
       "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
       "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
     },
-    {
-      "id": "track014",
-      "title": "NHK狂育讃歌 / THE FIRST TAKE",
-      "artist": "B子",
-      "file": "./music/女子キャラサイファーが歌うのび太サイファー.MP3",
-      "bg": "./bk/女子キャラサイファーが歌うのび太サイファー.png"
-    }
+
   ]
 }
