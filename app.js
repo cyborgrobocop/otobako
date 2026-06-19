@@ -31,7 +31,7 @@ const loginError  = document.getElementById('login-error');
 
 // セッションストレージでログイン状態を保持（タブを閉じるとリセット）
 function isLoggedIn() {
-  return sessionStorage.getItem('otobako_auth') === '1';
+  return localStorage.getItem('otobako_auth') === '1';
 }
 
 function showApp() {
@@ -72,7 +72,7 @@ async function attemptLogin() {
   await new Promise(r => setTimeout(r, 400));
 
   if (idH === AUTH.idHash && pwH === AUTH.pwHash) {
-    sessionStorage.setItem('otobako_auth', '1');
+    localStorage.setItem('otobako_auth', '1');
     showApp();
   } else {
     loginError.textContent = 'IDまたはパスワードが正しくありません';
@@ -85,7 +85,7 @@ async function attemptLogin() {
 }
 
 document.getElementById('logout-btn').addEventListener('click', () => {
-  sessionStorage.removeItem('otobako_auth');
+  localStorage.removeItem('otobako_auth');
   els.audioEl.pause();
   stopVisualizer();
   showLogin();
