@@ -182,18 +182,18 @@
   #stage > * { position: relative; z-index: 1; }
 
   #visualizer {
-    width: 200px;
-    height: 200px;
+    width: 160px;
+    height: 160px;
     flex-shrink: 0;
   }
 
   #now-info {
     text-align: center;
-    padding: 10px 24px 0;
+    padding: 6px 24px 0;
     max-width: 100%;
   }
   #now-title {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -201,9 +201,9 @@
     max-width: 88vw;
   }
   #now-artist {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     color: var(--text-dim);
-    margin-top: 3px;
+    margin-top: 2px;
   }
 
   /* シークバー */
@@ -212,8 +212,8 @@
     max-width: 360px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 12px;
+    gap: 3px;
+    margin-top: 8px;
   }
   #seek-bar {
     width: 100%;
@@ -250,8 +250,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 28px;
-    margin-top: 14px;
+    gap: 20px;
+    margin-top: 10px;
+    padding-bottom: 6px;
   }
   .ctrl-btn {
     background: none;
@@ -260,31 +261,31 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     cursor: pointer;
   }
   .ctrl-btn .icon {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 999px;
     border: 1.5px solid var(--line);
     background: var(--surface);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   .ctrl-btn .label {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
     color: var(--text-dim);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
   }
   .ctrl-btn:active .icon { transform: scale(0.93); }
 
   #play-btn .icon {
-    width: 60px;
-    height: 60px;
-    font-size: 1.4rem;
+    width: 56px;
+    height: 56px;
+    font-size: 1.3rem;
     background: var(--accent);
     border-color: var(--accent);
     color: var(--bg);
@@ -477,7 +478,7 @@
 
   <div id="stage">
     <div id="status-banner"></div>
-    <canvas id="visualizer" width="200" height="200"></canvas>
+    <canvas id="visualizer" width="160" height="160"></canvas>
     <div id="now-info">
       <div id="now-title">曲を選んでください</div>
       <div id="now-artist"></div>
