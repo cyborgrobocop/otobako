@@ -4,22 +4,15 @@
       "id": "track001",
       "title": "四次元ポッケに比べたら (from「もらいもん」)",
       "artist": "B子",
-      "file": "./music/四次元ポッケに比べたらfrom「もらいもん」.mp3"
+      "file": "./music/四次元ポッケに比べたらfrom「もらいもん」.mp3",
       "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
     },
     {
       "id": "track002",
-      "title": "黴菌 (ばいきん) THE FIRST TAKE",
+      "title": "徽菌（ばいきん）THE FIRST TAKE",
       "artist": "B子",
-      "file": "./music/黴菌 (ばいきん) THE FIRST TAKE.MP3"
+      "file": "./music/徽菌（ばいきん）THE FIRST TAKE.MP3",
       "bg": "./music/四次元ポッケに比べたらfrom「もらいもん」.png"
-    },
-    {
-      "id": "track003",
-      "title": "3曲目のタイトル",
-      "artist": "",
-      "file": "./music/3曲目のファイル名.mp3"
-      "bg": "./music/track001.jpg"
     }
   ]
 }
